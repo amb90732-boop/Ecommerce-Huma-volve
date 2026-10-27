@@ -1,19 +1,18 @@
-import 'package:ecommerce_app_huma_volve/features/home/models/products_model.dart';
+import 'package:ecommerce_app_huma_volve/features/home/domain/entities/product.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme.dart';
 import '../../details/screens/product_details_screen.dart';
 
 class ProductCard extends StatelessWidget {
-  // final Product product;
-  final ProductsModel productsModel;
+  final Product productsModel;
 
   const ProductCard({super.key, required this.productsModel});
 
   @override
   Widget build(BuildContext context) {
     final images = productsModel.images;
-    final imageUrl = images != null && images.isNotEmpty ? images.first : null;
+    final imageUrl = images.isNotEmpty ? images.first : null;
 
     return GestureDetector(
       onTap: () {
@@ -108,7 +107,7 @@ class ProductCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      productsModel.title ?? "",
+                      productsModel.title,
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
@@ -122,7 +121,7 @@ class ProductCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '\$${productsModel.price?.toStringAsFixed(2)}',
+                          '\$${productsModel.price.toStringAsFixed(2)}',
                           style: const TextStyle(
                             color: AppTheme.primary,
                             fontWeight: FontWeight.bold,

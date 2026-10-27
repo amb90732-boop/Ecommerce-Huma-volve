@@ -1,10 +1,10 @@
-import 'package:ecommerce_app_huma_volve/core/network/api_client.dart';
-import 'package:ecommerce_app_huma_volve/features/auth/sign_up/services/signup_servicers.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../../../../core/theme.dart';
+import '../../state/auth_state.dart';
 import '../../login/screens/login_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -19,9 +19,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
   late final TextEditingController nameController;
   late final TextEditingController emailController;
   late final TextEditingController passwordController;
-  bool isLoading = false;
-  late final SignupServicers signupServicers;
-  late final ApiClient apiClient;
+
+  Future<void> _signUp() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    final controller = context.read<AuthController>();
+    final success = await controller.register(
+      name: nameController.text.trim(),
+      email: emailController.text.trim(),
+      password: passwordController.text.trim(),
+    );
+    if (!mounted) return;
+
+    if (success) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(controller.errorMessage ?? 'Sign up failed.')),
+      );
+    }
+  }
 
   @override
   void initState() {
@@ -29,8 +49,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     nameController = TextEditingController();
     emailController = TextEditingController();
     passwordController = TextEditingController();
-    apiClient = ApiClient();
-    signupServicers = SignupServicers(apiClient);
   }
 
   @override
@@ -43,6 +61,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authController = context.watch<AuthController>();
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: SafeArea(
@@ -116,16 +135,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 40),
                 PrimaryButton(
                   text: 'Sign Up',
-                  onPressed: () async {
-                    if (_formKey.currentState?.validate() ?? false) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
-                        ),
-                      );
-                    }
-                  },
+                  onPressed: _signUp,
+                  isLoading: authController.status == AuthState.loading,
                 ),
                 const SizedBox(height: 24),
                 Row(

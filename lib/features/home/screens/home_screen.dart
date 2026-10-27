@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/dummy_data.dart';
 import '../../../core/theme.dart';
-import '../models/categories_model.dart';
+import '../domain/entities/category.dart';
 import '../widgets/product_card.dart';
 import '../widgets/category_chip.dart';
 
@@ -19,7 +19,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedCategoryIndex = 0;
 
-  void _selectCategory(int index, CategoryModel? category) {
+  void _selectCategory(int index, Category? category) {
     setState(() {
       _selectedCategoryIndex = index;
     });
@@ -139,9 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             .read<HomeCubit>()
                             .categories
                             .where(
-                              (category) =>
-                                  category.id != null &&
-                                  category.name?.trim().isNotEmpty == true,
+                              (category) => category.name.trim().isNotEmpty,
                             )
                             .toList();
 
@@ -158,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ? null
                                   : categories[index - 1];
                               return CategoryChip(
-                                label: isAll ? 'All' : category!.name!,
+                                label: isAll ? 'All' : category!.name,
                                 isSelected: _selectedCategoryIndex == index,
                                 onTap: () => _selectCategory(index, category),
                               );

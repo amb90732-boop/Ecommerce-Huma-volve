@@ -1,17 +1,38 @@
-# ecommerce_app_huma_volve
+# Huma Volve Ecommerce App
 
-A new Flutter project.
+## Architecture
 
-## Getting Started
+The API-backed Auth and Home features separate presentation, domain contracts,
+and data/infrastructure:
 
-This project is a starting point for a Flutter application.
+```text
+Auth screen -> AuthController -> AuthRepository
+                              -> AuthRepositoryImpl
+                                 -> AuthRemoteDataSource
+                                 -> TokenStorage
 
-A few resources to get you started if this is your first Flutter project:
+Home screen -> HomeCubit -> HomeRepository
+                          -> HomeRepositoryImpl
+                             -> HomeRemoteDataSource
+                                -> API DTOs -> domain entities
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+`main.dart` is the composition root. It creates the shared API client and
+concrete data/repository implementations, then provides the repository
+abstractions to the app. Screens and state controllers receive those
+abstractions rather than constructing HTTP clients.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The Home API models live in `features/home/data/models`; the Home domain
+entities and repository contract do not depend on Dio or Flutter. The Cart and
+Profile screens still use the project's existing demo data because those
+features do not yet have API-backed repositories.
+
+## Verification
+
+Run the app and checks from the project root:
+
+```powershell
+flutter run
+flutter analyze
+flutter test
+```

@@ -1,30 +1,25 @@
 import 'package:dio/dio.dart';
 
 import '../../../core/storage/token_storage.dart';
-import 'auth_api_service.dart';
+import '../domain/auth_exception.dart';
+import '../domain/auth_repository.dart';
+import 'auth_remote_data_source.dart';
 
-class AuthException implements Exception {
-  const AuthException(this.message);
-
-  final String message;
-
-  @override
-  String toString() => message;
-}
-
-class AuthRepository {
-  const AuthRepository({
+class AuthRepositoryImpl implements AuthRepository {
+  const AuthRepositoryImpl({
     required this._apiService,
     required this._tokenStorage,
   });
 
-  final AuthApiService _apiService;
+  final AuthRemoteDataSource _apiService;
   final TokenStorage _tokenStorage;
 
+  @override
   Future<String?> readAccessToken() {
     return _tokenStorage.readAccessToken();
   }
 
+  @override
   Future<void> login({required String email, required String password}) async {
     try {
       final response = await _apiService.login(
@@ -32,10 +27,12 @@ class AuthRepository {
         password: password,
       );
 
-      final token = response['accessToken'];
+      final token = response['access_token'] ?? response['accessToken'];
 
       if (token is! String || token.isEmpty) {
-        throw const AuthException('take sure of the swigger shape..');
+        throw const AuthException(
+          'The server did not return a valid access token.',
+        );
       }
 
       await _tokenStorage.saveAccessToken(token);
@@ -46,6 +43,7 @@ class AuthRepository {
     }
   }
 
+  @override
   Future<void> register({
     required String name,
     required String email,
@@ -60,6 +58,7 @@ class AuthRepository {
     }
   }
 
+  @override
   Future<void> logout() {
     return _tokenStorage.clear();
   }

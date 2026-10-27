@@ -1,6 +1,6 @@
 class ApiEndpoints {
-  static final String loginEndpoint = "auth/login";
-  static final String signupEndpoint = "users";
-  static final String categoriesEndpoint = "categories";
-  static final String productsEndpoint = "products";
+  static const String loginEndpoint = 'auth/login';
+  static const String signupEndpoint = 'users';
+  static const String categoriesEndpoint = 'categories';
+  static const String productsEndpoint = 'products';
 }

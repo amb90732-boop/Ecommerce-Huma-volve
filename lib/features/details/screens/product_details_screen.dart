@@ -1,33 +1,19 @@
-import 'package:ecommerce_app_huma_volve/features/home/models/products_model.dart';
+import 'package:ecommerce_app_huma_volve/features/home/domain/entities/product.dart';
 import 'package:flutter/material.dart';
 
-import '../../../core/dummy_data.dart';
 import '../../../core/theme.dart';
-import '../widgets/color_selector.dart';
-import '../widgets/size_selector.dart';
 import '../../../core/widgets/primary_button.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
-  // final Product product;
-  final ProductsModel productsModel;
+  final Product productsModel;
 
-  const ProductDetailsScreen({super.key, required this.productsModel, });
+  const ProductDetailsScreen({super.key, required this.productsModel});
 
   @override
   State<ProductDetailsScreen> createState() => _ProductDetailsScreenState();
 }
 
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
-  late Color _selectedColor;
-  late String _selectedSize;
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _selectedColor = widget.product.colors.first;
-  //   _selectedSize = widget.product.sizes.first;
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,10 +52,24 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             flexibleSpace: FlexibleSpaceBar(
               background: Hero(
                 tag: 'product-${widget.productsModel.id}',
-                child: Image.network(
-                  widget.productsModel.images![0],
-                  fit: BoxFit.cover,
-                ),
+                child: widget.productsModel.images.isEmpty
+                    ? const ColoredBox(
+                        color: Color(0xFFF0F0F0),
+                        child: Center(
+                          child: Icon(Icons.image_not_supported_outlined),
+                        ),
+                      )
+                    : Image.network(
+                        widget.productsModel.images.first,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const ColoredBox(
+                              color: Color(0xFFF0F0F0),
+                              child: Center(
+                                child: Icon(Icons.image_not_supported_outlined),
+                              ),
+                            ),
+                      ),
               ),
             ),
           ),
@@ -91,14 +91,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       children: [
                         Expanded(
                           child: Text(
-                            widget.productsModel.title ?? '',
+                            widget.productsModel.title,
                             style: Theme.of(context).textTheme.headlineLarge
                                 ?.copyWith(fontSize: 28, height: 1.2),
                           ),
                         ),
                         const SizedBox(width: 16),
                         Text(
-                          '\$${widget.productsModel.price?.toStringAsFixed(2)}',
+                          '\$${widget.productsModel.price.toStringAsFixed(2)}',
                           style: Theme.of(context).textTheme.headlineLarge
                               ?.copyWith(color: AppTheme.primary, fontSize: 24),
                         ),
@@ -112,7 +112,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      widget.productsModel.description ?? '',
+                      widget.productsModel.description,
                       style: Theme.of(context).textTheme.bodyMedium
                           ?.copyWith(height: 1.6, fontSize: 16),
                     ),
