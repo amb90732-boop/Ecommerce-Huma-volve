@@ -12,7 +12,7 @@ void main() {
   final tokenStorage = TokenStorage();
 
   final authApiService = AuthApiService(
-    baseUrl: 'https://api.escuelajs.co/api/v1',
+    baseUrl: 'https://api.escuelajs.co/api/v1/auth/login',
     tokenStorage: tokenStorage,
   );
 
