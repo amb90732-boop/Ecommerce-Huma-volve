@@ -1,4 +1,5 @@
 import 'package:ecommerce_app_huma_volve/features/home/cubit/home_cubit.dart';
+import 'package:ecommerce_app_huma_volve/features/home/cubit/home_state.dart';
 import 'package:ecommerce_app_huma_volve/features/home/domain/home_repository.dart';
 import 'package:ecommerce_app_huma_volve/features/home/domain/entities/category.dart';
 import 'package:ecommerce_app_huma_volve/features/home/domain/entities/product.dart';
@@ -17,7 +18,11 @@ class _FakeHomeRepository implements HomeRepository {
   ];
 
   @override
-  Future<List<Product>> getProducts({int? categoryId}) async {
+  Future<List<Product>> getProducts({
+    int? categoryId,
+    required int limit,
+    required int offset,
+  }) async {
     requestedCategoryIds.add(categoryId);
     final title = switch (categoryId) {
       1 => 'Shoes product',
@@ -34,6 +39,46 @@ class _FakeHomeRepository implements HomeRepository {
         images: const [],
       ),
     ];
+  }
+}
+
+class _PagedHomeRepository implements HomeRepository {
+  final requestedOffsets = <int>[];
+
+  @override
+  Future<List<Category>> getCategories() async => const [];
+
+  @override
+  Future<List<Product>> getProducts({
+    int? categoryId,
+    required int limit,
+    required int offset,
+  }) async {
+    requestedOffsets.add(offset);
+    if (offset > 0) {
+      return [
+        Product(
+          id: offset + 1,
+          title: 'Next page product',
+          price: 25,
+          description: '',
+          category: null,
+          images: const [],
+        ),
+      ];
+    }
+
+    return List.generate(
+      limit,
+      (index) => Product(
+        id: index + 1,
+        title: 'Product $index',
+        price: 25,
+        description: '',
+        category: null,
+        images: const [],
+      ),
+    );
   }
 }
 
@@ -67,5 +112,36 @@ void main() {
     expect(find.text('All products'), findsOneWidget);
     expect(repository.requestedCategoryIds, [null, 1, 2, null]);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('scrolling loads the next page and pull-to-refresh resets it', (
+    tester,
+  ) async {
+    final repository = _PagedHomeRepository();
+    final cubit = HomeCubit(repository);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BlocProvider.value(value: cubit, child: const HomeScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final scrollView = find.byType(CustomScrollView);
+    expect(repository.requestedOffsets, [0]);
+
+    await tester.drag(scrollView, const Offset(0, -5000));
+    await tester.pumpAndSettle();
+    expect(repository.requestedOffsets, [0, 20]);
+    expect((cubit.state as ProductsSuccess).products, hasLength(21));
+
+    await tester.drag(scrollView, const Offset(0, 5000));
+    await tester.pumpAndSettle();
+    await tester.drag(scrollView, const Offset(0, 600));
+    await tester.pumpAndSettle();
+    expect(repository.requestedOffsets, [0, 20, 0]);
+    expect((cubit.state as ProductsSuccess).products, hasLength(20));
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await cubit.close();
   });
 }

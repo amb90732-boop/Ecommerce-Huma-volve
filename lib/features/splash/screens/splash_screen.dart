@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../../auth/state/auth_state.dart';
-import '../../main_navigation/screens/main_navigation_screen.dart';
 import '../../../core/theme.dart';
 import '../../auth/login/screens/login_screen.dart';
 
@@ -24,19 +21,12 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
 
-    final authController = context.read<AuthController>();
-    if (authController.status == AuthState.checkingSession) {
-      await authController.checkSession();
-    }
-
     if (mounted) {
       Navigator.pushReplacement(
         context,
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
-              authController.status == AuthState.signedIn
-              ? const MainNavigationScreen()
-              : const LoginScreen(),
+              const LoginScreen(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(opacity: animation, child: child);
           },

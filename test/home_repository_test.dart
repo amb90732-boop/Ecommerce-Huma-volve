@@ -13,7 +13,11 @@ class _FakeHomeRemoteDataSource implements HomeRemoteDataSource {
   ];
 
   @override
-  Future<List<ProductModel>> getProducts({int? categoryId}) async => [
+  Future<List<ProductModel>> getProducts({
+    int? categoryId,
+    required int limit,
+    required int offset,
+  }) async => [
     ProductModel(
       id: 8,
       title: 'Sneakers',
@@ -30,7 +34,11 @@ void main() {
     final repository = HomeRepositoryImpl(_FakeHomeRemoteDataSource());
 
     final categories = await repository.getCategories();
-    final products = await repository.getProducts(categoryId: 5);
+    final products = await repository.getProducts(
+      categoryId: 5,
+      limit: 20,
+      offset: 0,
+    );
 
     expect(categories.single, isA<Category>());
     expect(categories.single.name, 'Shoes');

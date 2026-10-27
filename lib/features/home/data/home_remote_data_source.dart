@@ -7,7 +7,11 @@ import 'models/product_model.dart';
 abstract interface class HomeRemoteDataSource {
   Future<List<CategoryModel>> getCategories();
 
-  Future<List<ProductModel>> getProducts({int? categoryId});
+  Future<List<ProductModel>> getProducts({
+    int? categoryId,
+    required int limit,
+    required int offset,
+  });
 }
 
 class HomeApiDataSource implements HomeRemoteDataSource {
@@ -34,11 +38,18 @@ class HomeApiDataSource implements HomeRemoteDataSource {
   }
 
   @override
-  Future<List<ProductModel>> getProducts({int? categoryId}) async {
+  Future<List<ProductModel>> getProducts({
+    int? categoryId,
+    required int limit,
+    required int offset,
+  }) async {
     final endpoint = categoryId == null
         ? ApiEndpoints.productsEndpoint
         : "${ApiEndpoints.categoriesEndpoint}/$categoryId/${ApiEndpoints.productsEndpoint}";
-    final response = await _apiClient.dio.get(endpoint);
+    final response = await _apiClient.dio.get(
+      endpoint,
+      queryParameters: {'limit': limit, 'offset': offset},
+    );
 
     final data = response.data;
     if (data is! List) {

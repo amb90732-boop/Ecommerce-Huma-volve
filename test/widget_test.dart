@@ -12,8 +12,12 @@ import 'package:provider/provider.dart';
 import 'package:ecommerce_app_huma_volve/main.dart';
 
 class _FakeAuthRepository implements AuthRepository {
+  _FakeAuthRepository({this.accessToken});
+
+  final String? accessToken;
+
   @override
-  Future<String?> readAccessToken() async => null;
+  Future<String?> readAccessToken() async => accessToken;
 
   @override
   Future<void> login({required String email, required String password}) async {}
@@ -46,6 +50,29 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Welcome Back!'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('saved session still shows splash, login, and sign up', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      ChangeNotifierProvider(
+        create: (_) =>
+            AuthController(_FakeAuthRepository(accessToken: 'saved-token')),
+        child: const MyApp(),
+      ),
+    );
+
+    expect(find.text('Huma-volve'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+    expect(find.text('Welcome Back!'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Sign Up'));
+    await tester.tap(find.text('Sign Up'));
+    await tester.pumpAndSettle();
+    expect(find.text('Create Account'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

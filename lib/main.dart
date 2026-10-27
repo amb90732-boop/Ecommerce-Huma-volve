@@ -28,8 +28,7 @@ void main() {
         Provider<AuthRepository>.value(value: authRepository),
         Provider<HomeRepository>.value(value: homeRepository),
         ChangeNotifierProvider(
-          create: (context) =>
-              AuthController(context.read<AuthRepository>())..checkSession(),
+          create: (context) => AuthController(context.read<AuthRepository>()),
         ),
       ],
       child: const MyApp(),
